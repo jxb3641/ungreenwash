@@ -5,7 +5,8 @@ import json
 import glob
 import requests
 from pathlib import Path
-from OpenAIUtils import query_to_summaries, file_to_embeddings, produce_prompt 
+from OpenAIUtils import query_to_summaries, file_to_embeddings, produce_prompt
+from CohereUtils import query_to_summaries as query_to_summaries_cohere, file_to_embeddings as file_to_embeddings_cohere, produce_prompt as produce_prompt_cohere
 from EDGARFilingUtils import (
     get_all_submission_ids, 
     get_text_from_files_for_submission_id, 
@@ -36,8 +37,10 @@ list_of_questions = [
                     ]
 relevant_questions = st.multiselect("Select questions to use for search within the text.",
                                     list_of_questions,default=list_of_questions)
-temperature = st.number_input("GPT-3 Temperature",min_value = 0., max_value = 1., value=0.5, step=0.05)
+temperature = st.number_input("Model Temperature",min_value = 0., max_value = 1., value=0.5, step=0.05)
 
+st.markdown("#")
+st.markdown("### GPT-3")
 if st.button("Recalc embeddings"):
     st.write("Calculating Embeddings...")
     for fname in ["data/ind_lists/4_food_bev/10k/GIS_0001193125-21-204830_pooled.txt",
@@ -49,5 +52,19 @@ if st.button("Recalc embeddings"):
 if st.button("Search for relevant sections to list of questions"):
     st.write(produce_prompt("",query_text=relevant_questions[0]))
     df_completions = query_to_summaries(relevant_questions,temperature,print_responses=False)
+    st.table(df_completions)
+    df_completions.to_pickle("./risks_responses.pkl")
+
+st.markdown("#")
+st.markdown("### Cohere")
+if st.button("Recalc embeddings (Cohere)"):
+    st.write("Calculating Embeddings...")
+    for fname in ["data/ind_lists/4_food_bev/10k/GIS_0001193125-21-204830_pooled.txt"]:
+        embeddings = file_to_embeddings_cohere(Path(fname),use_cache=False) 
+    st.write("Embeddings Saved.")
+
+if st.button("Search for relevant sections to list of questions (Cohere)"):
+    st.write(produce_prompt_cohere("",query_text=relevant_questions[0]))
+    df_completions = query_to_summaries_cohere(relevant_questions,temperature,print_responses=False)
     st.table(df_completions)
     df_completions.to_pickle("./risks_responses.pkl")

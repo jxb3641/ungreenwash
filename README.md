@@ -11,7 +11,7 @@ First, clone this repository:
 
 `git clone https://github.com/jxb3641/ungreenwash.git`
 
-In a terminal:
+In a terminal: 
 - change directories into the cloned repo
 - Create a new virtual environment: `python3 -m venv .venv`
 - Activate the virtual environment: `source .venv/bin/activate`.  You know you did it right if you see the activated virtual environment in your terminal prompt, like 

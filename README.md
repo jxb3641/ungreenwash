@@ -51,6 +51,16 @@ If you're creating your own Streamlit script, be sure to get the secret using th
 
     openai.api_key = st.secrets["openai_api_key"]
 
+### Setting up Cohere API keys
+To interface with Cohere, you will also need an API key.
+- Go to https://docs.cohere.ai/
+- Click on "Get your API key"
+- Once you set up an account (you can create one with google), you will get an API key
+- Copy the key from your dashboard (https://dashboard.cohere.ai/) to the .streamlit/secrets.toml file, like this:
+```
+cohere_api_key = "abcdefg"
+```
+
 ## Overview
 
 ### data/ directory

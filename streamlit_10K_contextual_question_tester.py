@@ -7,6 +7,7 @@ import requests
 from pathlib import Path
 from OpenAIUtils import query_to_summaries, file_to_embeddings, produce_prompt
 from CohereUtils import query_to_summaries as query_to_summaries_cohere, file_to_embeddings as file_to_embeddings_cohere, produce_prompt as produce_prompt_cohere
+from HybridCompletion import query_to_summaries as query_to_summaries_hybrid, file_to_embeddings as file_to_embeddings_hybrid, produce_prompt as produce_prompt_hybrid
 from EDGARFilingUtils import (
     get_all_submission_ids, 
     get_text_from_files_for_submission_id, 
@@ -62,9 +63,22 @@ if st.button("Recalc embeddings (Cohere)"):
     for fname in ["data/ind_lists/4_food_bev/10k/GIS_0001193125-21-204830_pooled.txt"]:
         embeddings = file_to_embeddings_cohere(Path(fname),use_cache=False) 
     st.write("Embeddings Saved.")
-
 if st.button("Search for relevant sections to list of questions (Cohere)"):
     st.write(produce_prompt_cohere("",query_text=relevant_questions[0]))
     df_completions = query_to_summaries_cohere(relevant_questions,temperature,print_responses=False)
+    st.table(df_completions)
+    df_completions.to_pickle("./risks_responses.pkl")
+
+st.markdown("#")
+st.markdown("### Cohere Embedding + GPT-3 Completion")
+if st.button("Recalc embeddings (Cohere + GPT-3)"):
+    st.write("Calculating Embeddings...")
+    for fname in ["data/ind_lists/4_food_bev/10k/GIS_0001193125-21-204830_pooled.txt"]:
+        embeddings = file_to_embeddings_hybrid(Path(fname),use_cache=False) 
+    st.write("Embeddings Saved.")
+
+if st.button("Search for relevant sections to list of questions (Cohere + GPT-3)"):
+    st.write(produce_prompt_hybrid("",query_text=relevant_questions[0]))
+    df_completions = query_to_summaries_hybrid(relevant_questions,temperature,print_responses=False)
     st.table(df_completions)
     df_completions.to_pickle("./risks_responses.pkl")

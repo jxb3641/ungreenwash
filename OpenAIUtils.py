@@ -129,7 +129,7 @@ def questions_to_answers(list_of_questions,embeddings,answers_per_question=5, mi
 
     return pd.concat(question_results)
 
-def query_to_summaries(list_of_query_questions, completion_temperature = 0.5,print_responses=True):
+def query_to_summaries(filenames, list_of_query_questions, completion_temperature = 0.5,print_responses=True):
     """Given a list of search queries, embed them, and search the chunk database for most similar response.
     Then prompt GPT-3 to summarize the resulting sections. 
 
@@ -142,18 +142,17 @@ def query_to_summaries(list_of_query_questions, completion_temperature = 0.5,pri
         pd.DataFrame('filename', 'query', 'response',"confidence"): DataFrame containing the filename, query, and completion.
     """
     questions_to_gpt3_completions = []
-    for industry in ["4_food_bev","11_transportation"]:
-        for fname in glob(f"data/ind_lists/{industry}/10k/*_pooled.txt"):
-            embeddings = file_to_embeddings(Path(fname),use_cache=True)
-            df_questions_to_relevant_passages = questions_to_answers(list_of_query_questions,
-                                                                     embeddings,
-                                                                     answers_per_question=3,
-                                                                     min_similarity=0.25,
-                                                                     model_family='curie',pprint=False)
-            for _, fields in df_questions_to_relevant_passages.iterrows():
-                completion_prompt = produce_prompt(fields["text"],"") 
-                completion_resp =call_openai_api_completion(completion_prompt,model_family="davinci",temperature=completion_temperature) 
-                questions_to_gpt3_completions.append((Path(fname).stem,fields["Question"],fields["text"],completion_resp["text"],fields["similarities"]))
+    for fname in filenames:
+        embeddings = file_to_embeddings(Path(fname),use_cache=True)
+        df_questions_to_relevant_passages = questions_to_answers(list_of_query_questions,
+                                                                    embeddings,
+                                                                    answers_per_question=3,
+                                                                    min_similarity=0.25,
+                                                                    model_family='curie',pprint=False)
+        for _, fields in df_questions_to_relevant_passages.iterrows():
+            completion_prompt = produce_prompt(fields["text"],"") 
+            completion_resp =call_openai_api_completion(completion_prompt,model_family="davinci",temperature=completion_temperature) 
+            questions_to_gpt3_completions.append((Path(fname).stem,fields["Question"],fields["text"],completion_resp["text"],fields["similarities"]))
     if print_responses:
         for (fname, question, search_result, gpt3_completion,confidence) in questions_to_gpt3_completions:
                 print("For filing", fname)
@@ -255,5 +254,5 @@ def produce_prompt(context, query_text):
     """
     #return f"Given the text snippet:\n{context}\n\nWhat are the environmental regulation risks?\n\nAnswer:\n" 
     #return f"Given the text snippet:\n{context}\n\nWhat does this company do?\n\nAnswer:\n" 
-    return f"Given the text snippet:\n{context}\n\nWhat are the risks this company faces?\n\nAnswer:\n" 
+    #return f"Given the text snippet:\n{context}\n\nWhat are the risks this company faces?\n\nAnswer:\n" 
     return f"""From the 10-K excerpt below:\n\n{context}\n\nCan you paraphrase an answer to the following question: {query_text}\n\nAnswer:"""

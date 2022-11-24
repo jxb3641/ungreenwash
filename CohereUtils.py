@@ -108,7 +108,7 @@ def call_cohere_api_completion(prompt, temperature=0.0):
     )
     return response.generations[0].text
 
-def query_to_summaries(list_of_query_questions, completion_temperature = 0.5,print_responses=True):
+def query_to_summaries(filenames, list_of_query_questions, completion_temperature = 0.5,print_responses=True):
     """Given a list of search queries, embed them, and search the chunk database for most similar response.
     Then prompt GPT-3 to summarize the resulting sections. 
 
@@ -121,7 +121,7 @@ def query_to_summaries(list_of_query_questions, completion_temperature = 0.5,pri
         pd.DataFrame('filename', 'query', 'response',"confidence"): DataFrame containing the filename, query, and completion.
     """
     questions_to_gpt3_completions = []
-    for fname in ["data/ind_lists/4_food_bev/10k/GIS_0001193125-21-204830_pooled.txt"]:
+    for fname in filenames:
             embeddings = file_to_embeddings(Path(fname),use_cache=True)
             df_questions_to_relevant_passages = questions_to_answers(list_of_query_questions,
                                                                      embeddings,
@@ -196,5 +196,5 @@ def produce_prompt(context, query_text):
     """
     #return f"Given the text snippet:\n{context}\n\nWhat are the environmental regulation risks?\n\nAnswer:\n" 
     #return f"Given the text snippet:\n{context}\n\nWhat does this company do?\n\nAnswer:\n" 
-    return f"Given the text snippet:\n{context}\n\nWhat are the risks this company faces?\n\nAnswer:\n" 
+    #return f"Given the text snippet:\n{context}\n\nWhat are the risks this company faces?\n\nAnswer:\n" 
     return f"""From the 10-K excerpt below:\n\n{context}\n\nCan you paraphrase an answer to the following question: {query_text}\n\nAnswer:"""

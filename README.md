@@ -19,6 +19,10 @@ In a terminal:
     `(.venv) user@workstation: ~/OpenAI-hackathon-Scope3$ `
 
 - Install the `requirements.txt`: `pip install -r requirements.txt`
+    - This will take >20 minutes because of the haystack module
+- If you face an error including the "rust" keyword, you need to install the rust compiler by running this command and selecting the default options: 
+`curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+
 
 ### Setting up OpenAI API keys
 To use OpenAI, you need to set up your API keys locally.

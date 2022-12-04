@@ -4,6 +4,7 @@ import streamlit as st
 from glob import glob
 from openai.embeddings_utils import cosine_similarity
 from pathlib import Path
+from ratelimit import limits, sleep_and_retry
 
 from transformers import GPT2TokenizerFast
 tokenizer = GPT2TokenizerFast.from_pretrained("gpt2")
@@ -16,6 +17,9 @@ from EDGARFilingUtils import ROOT_DATA_DIR, filter_chunks, split_text, TICKER_TO
 EMBEDDING_CACHE_DIR = ROOT_DATA_DIR / "embedding_cache"
 SECTION_DELIM_PATTERN = re.compile("####.+") # for pooled 10k files
 
+ONE_MINUTE = 60
+MAX_CALLS_PER_MINUTE = 100
+
 def get_embedding(text):
     """Given a string of long-form text, produce the embedding using the corresponding text-search-doc API endpoint.
 
@@ -27,6 +31,8 @@ def get_embedding(text):
     Returns:
         np.ndarray: Vector representation of the text.
     """
+    check_cohere_rate_limit()
+
     embedding = None
     try:
         response = co.embed(model='large', texts=[text])
@@ -84,6 +90,7 @@ def file_to_embeddings(filepath, text_chunks = None, use_cache=True):
 
     return df_embeddings
 
+
 def call_cohere_api_completion(prompt, temperature=0.0):
     """Send a request to Cohere's generate API endpoint,
     with send_prompt and temperature.
@@ -98,6 +105,7 @@ def call_cohere_api_completion(prompt, temperature=0.0):
     Returns:
         str: The top scoring autocompletion. 
     """
+    check_cohere_rate_limit()
 
     response = co.generate(
       model='xlarge',
@@ -198,3 +206,9 @@ def produce_prompt(context, query_text):
     #return f"Given the text snippet:\n{context}\n\nWhat does this company do?\n\nAnswer:\n" 
     #return f"Given the text snippet:\n{context}\n\nWhat are the risks this company faces?\n\nAnswer:\n" 
     return f"""From the 10-K excerpt below:\n\n{context}\n\nCan you paraphrase an answer to the following question: {query_text}\n\nAnswer:"""
+
+@sleep_and_retry
+@limits(calls=MAX_CALLS_PER_MINUTE, period=ONE_MINUTE)
+def check_cohere_rate_limit():
+    """ Empty function to check if we are over the rate limit. """
+    return 

@@ -77,6 +77,30 @@ For each Submission ID there are assumed to be three `.txt` files:
 - The Item1 section of this filing, named as `submission-id_item1.txt` where newlines and markdown tags have been removed.
 - The Item7/MDA section of this filing, named as `submission-id_mda.txt` where newlines and markdown tags have have been removed.
 
+#### `company_data` subdir
+To help provide a more robust system, we decided to redo the 10-K data directory structure, so that all relevant information is stored per company rather than per filing type.  To this end, [this zip](https://drive.google.com/file/d/1ogYxSZ873Zt9jtvQdiaxmbACsUgWWSkA/view?usp=share_link) contains a directory, `company_data` that has the `10K_{cik}_item1.txt`, `10K_{cik}_item1A.txt`, `10K_{cik}_item7.txt`, and `10K_{cik}_item7a.txt` items per company, organized by ticker.
+
+The data structure is: 
+```
+company_data
+|
+-------TICKER1
+     |
+     | 10K_{cik1}_item1.txt
+     | 10K_{cik1}_item1A.txt
+     | 10K_{cik1}_item7.txt
+     | 10K_{cik1}_item7A.txt
+     |
+     --TICKER2
+     |
+     | 10K_{cik2}_item1.txt
+     | 10K_{cik2}_item1A.txt
+     | 10K_{cik2}_item7.txt
+     | 10K_{cik2}_item7A.txt
+     |
+...     
+```
+
 ### Convenience function modules
 
 #### EDGARFilingUtils.py
